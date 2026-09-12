@@ -1,0 +1,19 @@
+:root { color-scheme: light dark; font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; }
+body { margin: 0; background: #eef3f8; color: #182533; }
+.shell { max-width: 980px; margin: 0 auto; padding: 2.5rem 1.25rem; }
+header { display: flex; justify-content: space-between; align-items: start; margin-bottom: 1.5rem; }
+h1 { margin: .15rem 0 0; font-size: 2rem; } h2 { margin-top: 0; font-size: 1.15rem; }
+.eyebrow { color: #47647f; font-size: .8rem; font-weight: 700; letter-spacing: .1em; margin: 0; }
+.status-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: .8rem; }
+.status-grid article, .panel { background: #fff; border: 1px solid #d9e2ec; border-radius: .8rem; padding: 1rem; box-shadow: 0 3px 12px #29445b0d; }
+.status-grid span, .hint { color: #63778d; font-size: .85rem; } .status-grid strong { display: block; margin-top: .4rem; }
+.panel { margin-top: 1rem; } form { display: flex; gap: .75rem; align-items: end; flex-wrap: wrap; }
+label { display: grid; gap: .35rem; font-size: .9rem; } input { min-width: 14rem; padding: .65rem; border: 1px solid #b8c7d6; border-radius: .45rem; }
+button { border: 0; border-radius: .45rem; background: #165d9c; color: #fff; font-weight: 650; padding: .7rem 1rem; cursor: pointer; }
+button.secondary { background: #48647f; } button.danger { background: #a63b32; }
+.course-list > div, .queue-row { display:flex; justify-content:space-between; gap:.6rem; align-items:center; padding:.55rem 0; border-top:1px solid #edf1f5; }
+.course-list form, .queue-row form { display:inline-flex; } small { color:#63778d; } select { padding:.65rem; border-radius:.45rem; }
+.actions form { display: inline-flex; margin: 0 .5rem .5rem 0; } .notice { background: #dff3ea; color: #145637; border-radius: .5rem; padding: .8rem 1rem; }
+.warning { background: #fff0d7; color: #734500; }
+.mode { border-radius: 999px; padding: .45rem .7rem; font-size: .85rem; font-weight: 700; } .safe { background: #dff3ea; color: #145637; } .live { background: #fde4df; color: #8d271c; }
+@media (max-width: 650px) { .status-grid { grid-template-columns: repeat(2, 1fr); } header { gap: 1rem; } }

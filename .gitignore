@@ -1,0 +1,17 @@
+# Python 运行产物
+__pycache__/
+*.py[cod]
+
+# 本地运行数据、日志与临时缓存（可能包含课程数据，不上传）
+data/
+logs/
+*.log
+
+# 本机配置、凭据和编辑器文件
+user.txt
+.env
+.venv/
+venv/
+.DS_Store
+.vscode/
+.idea/

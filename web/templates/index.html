@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TIS 选课助手</title>
+  <link rel="stylesheet" href="{{ url_for('static', path='app.css') }}">
+</head>
+<body>
+  <main class="shell">
+    <p id="local-file-warning" class="notice warning" hidden>当前页面是以本地文件方式打开的，无法登录。请关闭此标签页，然后双击“启动 TIS 选课助手.command”。</p>
+    <header>
+      <div>
+        <p class="eyebrow">SUSTech TIS</p>
+        <h1>选课助手</h1>
+      </div>
+      <span class="mode {{ 'safe' if state.dry_run else 'live' }}">
+        {{ '只读预演 ON' if state.dry_run else '真实提交 ON' }}
+      </span>
+    </header>
+    <section class="status-grid" aria-label="系统状态">
+      <article><span>CAS</span><strong>{{ state.cas_status }}</strong></article>
+      <article><span>TIS</span><strong>{{ '正常' if state.client else '未知' }}</strong></article>
+      <article><span>当前学期</span><strong>{{ state.semester or '未加载' }}</strong></article>
+      <article><span>课程缓存</span><strong>{{ state.course_count ~ ' 条' if state.course_count else '未加载' }}</strong></article>
+    </section>
+    {% if message %}<p class="notice">{{ message }}</p>{% endif %}
+    {% if not state.client %}
+    <section class="panel">
+      <h2>CAS 登录</h2>
+      <form method="post" action="/login">
+        <label>学号<input name="username" autocomplete="username" required></label>
+        <label>CAS 密码<input name="password" type="password" autocomplete="current-password" required></label>
+        <label><input name="remember_password" type="checkbox"> 记住密码到 macOS Keychain</label>
+        <button type="submit">登录</button>
+      </form>
+      <p class="hint">密码仅用于本次 CAS 登录，不写入磁盘。</p>
+      <form method="post" action="/login/keychain">
+        <label>已保存密码的学号<input name="username" autocomplete="username" required></label>
+        <button class="secondary" type="submit">使用钥匙串密码登录</button>
+      </form>
+    </section>
+    {% else %}
+    <section class="panel actions">
+      <h2>课程与预演</h2>
+      <form method="post" action="/courses/refresh"><button>刷新课程数据</button></form>
+      <form method="post" action="/dry-run">
+        <input type="hidden" name="enabled" value="{{ 'off' if state.dry_run else 'on' }}">
+        <button class="secondary">{{ '关闭只读预演' if state.dry_run else '启用只读预演' }}</button>
+      </form>
+      <form method="post" action="/logout"><button class="danger">退出登录</button></form>
+    </section>
+    <section class="panel">
+      <h2>课程搜索</h2>
+      <form method="get"><input name="q" value="{{ query }}" placeholder="课程名称或类别"><button>搜索</button></form>
+      {% if courses %}<div class="course-list">{% for course in courses %}
+        <div><span>{{ course.name }} <small>{{ course.category }}</small></span>
+          <form method="post" action="/queue/add"><input type="hidden" name="task_id" value="{{ course.task_id }}"><button>加入待选</button></form>
+        </div>{% endfor %}</div>{% endif %}
+    </section>
+    <section class="panel">
+      <h2>待选队列</h2>
+      {% for course in state.queue %}<div class="queue-row"><span>{{ loop.index }}. {{ course.name }} <small>{{ course.category }}</small></span>
+        <form method="post" action="/queue/move"><input type="hidden" name="task_id" value="{{ course.task_id }}"><input type="hidden" name="direction" value="up"><button class="secondary">上移</button></form>
+        <form method="post" action="/queue/move"><input type="hidden" name="task_id" value="{{ course.task_id }}"><input type="hidden" name="direction" value="down"><button class="secondary">下移</button></form>
+        <form method="post" action="/queue/remove"><input type="hidden" name="task_id" value="{{ course.task_id }}"><button class="danger">移除</button></form>
+      </div>{% else %}<p class="hint">从课程搜索结果加入目标课程。</p>{% endfor %}
+    </section>
+    <section class="panel">
+      <h2>运行任务</h2>
+      <form method="post" action="/task/start"><select name="mode"><option value="priority">优先级模式</option><option value="cycle">循环模式</option></select>
+        {% if not state.dry_run %}<input name="confirm_live" placeholder="输入 RUN 确认真实提交">{% endif %}<button>开始</button></form>
+      {% if state.task_manager %}<p>任务状态：{{ state.task_manager.state.value }}；总尝试：{{ state.task_manager.total_attempts }}</p>
+      <form method="post" action="/task/control"><button name="action" value="pause" class="secondary">暂停</button><button name="action" value="resume" class="secondary">继续</button><button name="action" value="stop" class="danger">停止</button></form>
+      {% for item in task_items %}<p class="hint">{{ item.course.name }}：{{ item.status }}，尝试 {{ item.attempts }} 次，{{ item.last_result }}</p>{% endfor %}{% endif %}
+    </section>
+    {% endif %}
+    <section class="panel">
+      <h2>运行提示</h2>
+      <p>课程刷新会使用当前 Session 查询本学期课程。只读预演不会提交选课请求。</p>
+    </section>
+  </main>
+  <script>
+    if (window.location.protocol === "file:") {
+      document.getElementById("local-file-warning").hidden = false;
+      document.querySelectorAll("form").forEach((form) => {
+        form.addEventListener("submit", (event) => event.preventDefault());
+      });
+    }
+  </script>
+</body>
+</html>
